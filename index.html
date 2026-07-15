@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Avance Terminaciones</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div id="header-supervisor">Orompello Centro</div>
+    <div id="header-title">Avance Terminaciones</div>
+    <button id="btn-logout" class="btn-logout" onclick="logout()">Salir</button>
+  </header>
+
+  <main>
+    <div class="screen active" id="screen-login">
+      <div style="text-align:center;padding:40px 20px">
+        <div style="font-size:28px;font-weight:800;margin-bottom:4px">🏗️</div>
+        <h1 style="font-size:20px;margin:0 0 4px">Edificio Orompello Centro</h1>
+        <p style="color:var(--text2);font-size:13px">Control de Avance Terminaciones</p>
+      </div>
+      <div class="login-grid"></div>
+    </div>
+
+    <div class="screen" id="screen-dashboard">
+      <div id="dashboard-content"></div>
+    </div>
+
+    <div class="screen" id="screen-activities">
+      <div id="activities-content"></div>
+    </div>
+
+    <div class="screen" id="screen-export">
+      <div id="export-content"></div>
+    </div>
+  </main>
+
+  <nav id="nav-supervisor">
+    <button class="nav-btn" data-view="dashboard"><span class="nav-icon">📊</span>Resumen</button>
+    <button class="nav-btn" data-view="activities"><span class="nav-icon">📋</span>Actividades</button>
+    <button class="nav-btn" data-view="export"><span class="nav-icon">⚙️</span>Datos</button>
+  </nav>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>
