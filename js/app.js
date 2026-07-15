@@ -72,12 +72,13 @@ function getAllProgress(supId) {
   return { done, total };
 }
 
-function getDayDepts(actIdx, dayIdx) {
-  const pending = ACTIVITIES[actIdx].pending;
-  return pending.filter((_, i) => i % 5 === dayIdx);
+function getDeptsForDate(actIdx, date) {
+  const dStr = date.toISOString().slice(0, 10);
+  return ACTIVITIES[actIdx].schedule[dStr] || [];
 }
 
 function getWeekProgressAll(supId) {
+  const dates = getWeekDates(state.selectedWeek);
   const indices = SUPERVISOR_ACTIVITIES[supId] || [];
   const result = [];
   for (const idx of indices) {
@@ -85,20 +86,22 @@ function getWeekProgressAll(supId) {
     const dayEntries = [];
     let totalAct = 0, doneAct = 0;
     for (let i = 0; i < 5; i++) {
-      const depts = getDayDepts(idx, i);
+      const date = dates[i];
+      const depts = getDeptsForDate(idx, date);
       if (depts.length === 0) continue;
       const doneDepts = depts.filter(d => isDeptDoneGlobal(supId, idx, d));
       dayEntries.push({ dayIdx: i, depts, doneDepts });
       totalAct += depts.length;
       doneAct += doneDepts.length;
     }
+    if (totalAct === 0) continue;
     result.push({
       idx, name: act.name, responsable: act.responsable,
       dayEntries, totalAct, doneAct,
       allDone: totalAct > 0 && doneAct === totalAct
     });
   }
-  return result.filter(r => r.totalAct > 0);
+  return result;
 }
 
 // ===================== STATE =====================
@@ -425,7 +428,7 @@ function showDayDetail(actIdx, dayIdx) {
   const dates = getWeekDates(state.selectedWeek);
   const date = dates[dayIdx];
   const act = ACTIVITIES[actIdx];
-  const depts = getDayDepts(actIdx, dayIdx);
+  const depts = getDeptsForDate(actIdx, date);
   if (depts.length === 0) return;
   const dayLabel = date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
   const supId = state.currentUser;

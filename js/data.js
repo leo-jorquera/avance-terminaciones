@@ -1,33 +1,68 @@
 const SUPERVISORS = [
-  {
-    "id": "francisco-ibanez",
-    "name": "Francisco Ibañez",
-    "password": "fran123"
-  },
-  {
-    "id": "hernan-castro",
-    "name": "Hernán Castro",
-    "password": "hernan123"
-  },
-  {
-    "id": "oscar-navarrete",
-    "name": "Óscar Navarrete",
-    "password": "oscarn123"
-  },
-  {
-    "id": "oscar-carrasco",
-    "name": "Óscar Carrasco",
-    "password": "oscarc123"
-  }
+  { "id": "francisco-ibanez", "name": "Francisco Ibañez", "password": "fran123" },
+  { "id": "hernan-castro", "name": "Hernán Castro", "password": "hernan123" },
+  { "id": "oscar-navarrete", "name": "Óscar Navarrete", "password": "oscarn123" },
+  { "id": "oscar-carrasco", "name": "Óscar Carrasco", "password": "oscarc123" },
 ];
 
 const ALL_DEPTS = ["201", "202", "203", "301", "302", "303", "304", "305", "306", "401", "402", "403", "404", "405", "406", "501", "502", "503", "504", "505", "506", "601", "602", "603", "604", "605", "606", "701", "702", "703", "704", "705", "706", "801", "802", "803", "804", "805", "806", "901", "902", "903", "904", "905", "906", "1001", "1002", "1003", "1004", "1005", "1101", "1102", "1103", "1104", "1105", "1201", "1202", "1203", "1204", "1301", "1302", "1303", "1304", "1401", "1402", "1403", "1404", "1501", "1502", "1503", "1504", "QUINCHO", "GIMNASIO", "SALA MULTIUSO"];
+
+const ADMIN = { id: "admin", name: "Administrador" };
+const ADMIN_PASSWORD = "Limc2450725351";
+
+const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
+const WEEKDAY_LABELS = { mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie' };
+const WEEKDAY_FULL = { mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes' };
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function getWeekDates(monday) {
+  const dates = [];
+  const days = [1, 2, 3, 4, 5];
+  for (const d of days) {
+    const date = new Date(monday);
+    const diff = d - date.getDay();
+    date.setDate(date.getDate() + diff);
+    dates.push(date);
+  }
+  return dates;
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+}
+
+function formatDateFull(date) {
+  return date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function getTodayWeekdayIndex() {
+  const day = new Date().getDay();
+  const map = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 0, 0: 0 };
+  return map[day] ?? 0;
+}
+
+function getDeptLabel(code) {
+  const s = String(code);
+  if (s.length === 3) return `Piso ${s[0]} \u00b7 Depto ${s.slice(1)}`;
+  if (s.length === 4) return `Piso ${s.slice(0,2)} \u00b7 Depto ${s.slice(2)}`;
+  return code;
+}
 
 const ACTIVITIES = [
   {
     "name": "HORMIGÓN DE GRADA BUQUE",
     "responsable": "Francisco Ibañez",
     "supervisorId": "francisco-ibanez",
+    "sem": 74,
+    "fecha": "2026-06-01",
     "done": [
       "201",
       "202",
@@ -104,12 +139,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "HORMIGÓN DE SOBRELOSA",
     "responsable": "Francisco Ibañez",
     "supervisorId": "francisco-ibanez",
+    "sem": 74,
+    "fecha": "2026-06-01",
     "done": [
       "201",
       "202",
@@ -186,12 +224,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "PICADO Y DESBASTE DE CIELO Y MUROS",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -269,12 +310,19 @@ const ACTIVITIES = [
     ],
     "pending": [
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "DESPEJE QUESO Y REPARACIÓN DESPICHES BALCONES",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-04-13",
     "done": [
       "201",
       "202",
@@ -351,12 +399,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "TRAZADO",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-04-13",
     "done": [
       "201",
       "202",
@@ -433,12 +484,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "DESPEJE QUESO Y CENTRADO TUBERIAS ELECTRICAS",
     "responsable": "Tatter & Baeza",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-04-13",
     "done": [
       "201",
       "202",
@@ -515,12 +569,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "DESPEJE QUESO Y CENTRADO TUBERIAS AP",
     "responsable": "Agua Dulce",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-04-13",
     "done": [
       "201",
       "202",
@@ -597,12 +654,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "RASGOS DE VENTANAS Y PUERTAS DE ACCESO",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-04-13",
     "done": [
       "201",
       "202",
@@ -679,12 +739,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "CORONACIÓN DE VIGA BALCÓN",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -762,12 +825,19 @@ const ACTIVITIES = [
     ],
     "pending": [
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "MAQUILLAJE MURO BAÑO Y SALPICADERO",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -845,12 +915,21 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "IMPERMEABILIZACIÓN DE VENTANAS",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 67,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -928,12 +1007,21 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "INSTALACIÓN DE VENTANAS",
     "responsable": "Kinetta",
     "supervisorId": "hernan-castro",
+    "sem": 63,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -1011,12 +1099,30 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "1404"
+      ],
+      "2026-07-03": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-10": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CANAL SUPERIOR TABIQUERÍA",
     "responsable": "Hernan Castro",
     "supervisorId": "hernan-castro",
+    "sem": 63,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -1094,12 +1200,31 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "1401",
+        "1403"
+      ],
+      "2026-07-03": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-10": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "YESO DE CIELOS Y MUROS",
     "responsable": "C. Buffalo",
     "supervisorId": "hernan-castro",
+    "sem": 63,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -1177,12 +1302,30 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "1401"
+      ],
+      "2026-07-03": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-10": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "DUCTOS SANITARIOS SHAFT",
     "responsable": "Agua Dulce",
     "supervisorId": "hernan-castro",
+    "sem": 63,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -1260,12 +1403,27 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-10": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "DUCTOS VENTILACIÓN SHAFT",
     "responsable": "Chiltermic",
     "supervisorId": "hernan-castro",
+    "sem": 63,
+    "fecha": "2026-05-29",
     "done": [
       "201",
       "202",
@@ -1343,12 +1501,40 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-05-29": [
+        "904",
+        "906"
+      ],
+      "2026-06-05": [
+        "1101",
+        "1103",
+        "1105"
+      ],
+      "2026-06-26": [
+        "1401",
+        "1404"
+      ],
+      "2026-07-03": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-10": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "BARANDA METÁLICA",
     "responsable": "Victor Duran",
     "supervisorId": "hernan-castro",
+    "sem": 59,
+    "fecha": "2026-02-16",
     "done": [
       "201",
       "202",
@@ -1425,12 +1611,15 @@ const ACTIVITIES = [
       "GIMNASIO",
       "SALA MULTIUSO"
     ],
-    "pending": []
+    "pending": [],
+    "schedule": {}
   },
   {
     "name": "ESTRUCTURA VOLCOMETAL TABIQUERÍA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 59,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -1508,12 +1697,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-10": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-17": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "INSTALACIÓN ELECTRICA TABIQUERÍA",
     "responsable": "Tatter & Baeza",
     "supervisorId": "oscar-navarrete",
+    "sem": 59,
+    "fecha": "2026-06-29",
     "done": [
       "201",
       "202",
@@ -1591,12 +1801,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-29": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-06": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-13": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PRIMERA CARA VOLCANITA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 55,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -1674,12 +1905,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-17": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-24": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "DISTRIBUCIÓN AGUA POTABLE TABIQUERÍA",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-navarrete",
+    "sem": 55,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -1757,12 +2009,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-17": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-24": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "LANA FISITERM TABIQUERÍA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 50,
+    "fecha": "2026-07-17",
     "done": [
       "201",
       "202",
@@ -1840,12 +2113,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-24": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-31": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "SEGUNDA CARA VOLCANITA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 50,
+    "fecha": "2026-07-17",
     "done": [
       "201",
       "202",
@@ -1923,12 +2217,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-24": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-31": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "LANA FISITERM SHAFT",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 50,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -2006,12 +2321,39 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-17": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-24": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-31": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "VOLCOPANEL SHAFT",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 50,
+    "fecha": "2026-06-12",
     "done": [
       "201",
       "202",
@@ -2089,12 +2431,50 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-12": [
+        "904",
+        "906"
+      ],
+      "2026-06-26": [
+        "1101",
+        "1103"
+      ],
+      "2026-07-03": [
+        "1201"
+      ],
+      "2026-07-10": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-17": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-24": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-31": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "IMPERMEABILIZACIÓN DE TERRAZA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 50,
+    "fecha": "2026-07-17",
     "done": [
       "201",
       "202",
@@ -2172,12 +2552,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-24": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-07-31": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "IMPERMEABILIZACIÓN DE BAÑOS Y COCINA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -2255,12 +2656,42 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "1201"
+      ],
+      "2026-07-17": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ENCATRADO RECEPTACULO",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -2338,12 +2769,52 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-10": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-17": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "HUINCHA Y PASTA TABIQUERÍA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-07-24",
     "done": [
       "201",
       "202",
@@ -2421,12 +2892,33 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PORCELANATO DE LIVING Y COCINA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -2504,12 +2996,51 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "1101",
+        "1102",
+        "1104",
+        "1105"
+      ],
+      "2026-07-10": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-17": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PORCELANATO TERRAZA",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-06-12",
     "done": [
       "201",
       "202",
@@ -2587,12 +3118,55 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-12": [
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-03": [
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-10": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-17": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PORCELANATO DE BAÑO",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -2670,12 +3244,52 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-10": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-17": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "NIVELACION DE PISO DORMITORIOS",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 45,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -2753,12 +3367,48 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "1005"
+      ],
+      "2026-07-10": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-17": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-24": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-07-31": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-07": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PRIMERA MANO PINTURA CLOSET",
     "responsable": "C. Buffalo",
     "supervisorId": "oscar-navarrete",
+    "sem": 39,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -2836,12 +3486,55 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "906"
+      ],
+      "2026-07-10": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-17": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-24": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-07-31": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-07": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-14": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "VIGONES DE BAÑO",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 33,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -2919,12 +3612,70 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "803"
+      ],
+      "2026-07-03": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-10": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-17": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-24": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-07-31": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-07": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-14": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-21": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CORNISAS DE BAÑO",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 27,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -3002,12 +3753,73 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-10": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-17": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-24": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-31": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-07": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-14": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-21": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-28": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "INSTALACIÓN DE RECEPTACULO Y TINAS",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-navarrete",
+    "sem": 21,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -3085,12 +3897,74 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "705"
+      ],
+      "2026-07-10": [
+        "801",
+        "804",
+        "805"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "BOTA AGUAS RECEPTÁCULO Y TINAS",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 21,
+    "fecha": "2026-06-12",
     "done": [
       "201",
       "202",
@@ -3168,12 +4042,107 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-12": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-06-19": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-06-26": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-03": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-10": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "MUEBLE BASE COCINA",
     "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "202",
@@ -3251,12 +4220,89 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "504"
+      ],
+      "2026-06-26": [
+        "604"
+      ],
+      "2026-07-03": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-10": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "MUEBLE AÉREO COCINA",
     "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "202",
@@ -3334,12 +4380,90 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "504"
+      ],
+      "2026-06-26": [
+        "604",
+        "606"
+      ],
+      "2026-07-03": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-10": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CENEFA MUEBLE COCINA",
     "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "202",
@@ -3417,12 +4541,90 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "504"
+      ],
+      "2026-06-26": [
+        "604",
+        "606"
+      ],
+      "2026-07-03": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-10": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "BASE PISO MUEBLE CLOSET",
     "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-07-17",
     "done": [
       "201",
       "202",
@@ -3500,12 +4702,63 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "904",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PIERNA MUEBLE CLOSET",
     "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-07-17",
     "done": [
       "201",
       "202",
@@ -3583,12 +4836,63 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "904",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CENEFA MUEBLE CLOSET",
     "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-07-17",
     "done": [
       "201",
       "202",
@@ -3666,12 +4970,63 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "904",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "VIGONES ZONAS SECAS",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 21,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -3749,12 +5104,73 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "802",
+        "803",
+        "804",
+        "805"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CORNISAS ZONAS SECAS",
     "responsable": "Oscar Navarrete",
     "supervisorId": "oscar-navarrete",
+    "sem": 21,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -3832,12 +5248,73 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PREPARACIÓN CIELO BAÑO",
     "responsable": "C. Buffalo",
-    "supervisorId": "oscar-navarrete",
+    "supervisorId": null,
+    "sem": 21,
+    "fecha": "2026-06-12",
     "done": [
       "201",
       "202",
@@ -3915,593 +5392,102 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "MUEBLE BASE COCINA",
-    "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "404",
-      "405",
-      "406",
-      "501",
-      "502",
-      "503",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "605",
-      "606"
     ],
-    "pending": [
-      "504",
-      "604",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "904",
-      "905",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "MUEBLE AÉREO COCINA",
-    "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "404",
-      "405",
-      "406",
-      "501",
-      "502",
-      "503",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "605"
-    ],
-    "pending": [
-      "504",
-      "604",
-      "606",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "904",
-      "905",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "CENEFA MUEBLE COCINA",
-    "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "404",
-      "405",
-      "406",
-      "501",
-      "502",
-      "503",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "605"
-    ],
-    "pending": [
-      "504",
-      "604",
-      "606",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "904",
-      "905",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "BASE PISO MUEBLE CLOSET",
-    "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "404",
-      "405",
-      "406",
-      "501",
-      "502",
-      "503",
-      "504",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "604",
-      "605",
-      "606",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "905"
-    ],
-    "pending": [
-      "904",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "PIERNA MUEBLE CLOSET",
-    "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "404",
-      "405",
-      "406",
-      "501",
-      "502",
-      "503",
-      "504",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "604",
-      "605",
-      "606",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "905"
-    ],
-    "pending": [
-      "904",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "CENEFA MUEBLE CLOSET",
-    "responsable": "Muebles Norton Sur",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "404",
-      "405",
-      "406",
-      "501",
-      "502",
-      "503",
-      "504",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "604",
-      "605",
-      "606",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "905"
-    ],
-    "pending": [
-      "904",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
-  },
-  {
-    "name": "PREPARACIÓN CIELO BAÑO",
-    "responsable": "C. Buffalo",
-    "supervisorId": "oscar-carrasco",
-    "done": [
-      "201",
-      "202",
-      "203",
-      "301",
-      "302",
-      "303",
-      "304",
-      "305",
-      "306",
-      "401",
-      "402",
-      "403",
-      "405",
-      "406"
-    ],
-    "pending": [
-      "404",
-      "501",
-      "502",
-      "503",
-      "504",
-      "505",
-      "506",
-      "601",
-      "602",
-      "603",
-      "604",
-      "605",
-      "606",
-      "701",
-      "702",
-      "703",
-      "704",
-      "705",
-      "706",
-      "801",
-      "802",
-      "803",
-      "804",
-      "805",
-      "806",
-      "901",
-      "902",
-      "903",
-      "904",
-      "905",
-      "906",
-      "1001",
-      "1002",
-      "1003",
-      "1004",
-      "1005",
-      "1101",
-      "1102",
-      "1103",
-      "1104",
-      "1105",
-      "1201",
-      "1202",
-      "1203",
-      "1204",
-      "1301",
-      "1302",
-      "1303",
-      "1304",
-      "1401",
-      "1402",
-      "1403",
-      "1404",
-      "1501",
-      "1502",
-      "1503",
-      "1504",
-      "QUINCHO",
-      "GIMNASIO",
-      "SALA MULTIUSO"
-    ]
+    "schedule": {
+      "2026-06-12": [
+        "404"
+      ],
+      "2026-06-19": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-06-26": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-03": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-10": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-17": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-07": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-14": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-21": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-08-28": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-04": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ESTRUCTURA INTERIOR CLOSET",
     "responsable": "Muebles Norton Sur",
     "supervisorId": "oscar-carrasco",
+    "sem": 15,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "202",
@@ -4579,12 +5565,89 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "404"
+      ],
+      "2026-06-26": [
+        "504"
+      ],
+      "2026-07-03": [
+        "606"
+      ],
+      "2026-07-10": [
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-24": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-31": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-08-07": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-14": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-21": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-28": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-09-04": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-11": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PREPARACIÓN CIELO ZONAS SECAS + LOSALIN",
     "responsable": "C. Buffalo",
     "supervisorId": "oscar-carrasco",
+    "sem": 15,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "202",
@@ -4662,12 +5725,98 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "404"
+      ],
+      "2026-06-26": [
+        "504",
+        "505"
+      ],
+      "2026-07-03": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-10": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-24": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-31": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-08-07": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-14": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-21": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-28": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-09-04": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-11": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ZÓCALO DE BAÑO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 15,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -4745,12 +5894,91 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-10": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-24": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-31": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-08-07": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-14": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-21": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-28": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-09-04": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-11": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "REVESTIMIENTO MURO PVC BAÑO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 9,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "203"
@@ -4828,12 +6056,108 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "202",
+        "301",
+        "302",
+        "303"
+      ],
+      "2026-06-26": [
+        "304",
+        "305",
+        "306",
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-03": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506",
+        "601",
+        "602",
+        "603"
+      ],
+      "2026-07-10": [
+        "604",
+        "605",
+        "606",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "901",
+        "902",
+        "903"
+      ],
+      "2026-07-24": [
+        "904",
+        "905",
+        "906",
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105",
+        "1201",
+        "1202"
+      ],
+      "2026-08-07": [
+        "1203",
+        "1204",
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-14": [
+        "1401",
+        "1402",
+        "1403",
+        "1404",
+        "1501",
+        "1502"
+      ],
+      "2026-08-21": [
+        "1503",
+        "1504",
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "REVESTIMIENTO DE ZÓCALO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 6,
+    "fecha": "2026-06-19",
     "done": [
       "201",
       "203"
@@ -4911,12 +6235,108 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "202",
+        "301",
+        "302",
+        "303"
+      ],
+      "2026-06-26": [
+        "304",
+        "305",
+        "306",
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-03": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506",
+        "601",
+        "602",
+        "603"
+      ],
+      "2026-07-10": [
+        "604",
+        "605",
+        "606",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "901",
+        "902",
+        "903"
+      ],
+      "2026-07-24": [
+        "904",
+        "905",
+        "906",
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105",
+        "1201",
+        "1202"
+      ],
+      "2026-08-07": [
+        "1203",
+        "1204",
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-14": [
+        "1401",
+        "1402",
+        "1403",
+        "1404",
+        "1501",
+        "1502"
+      ],
+      "2026-08-21": [
+        "1503",
+        "1504",
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "REVESTIMIENTO MURO PVC SALPICADERO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 6,
+    "fecha": "2026-06-19",
     "done": [],
     "pending": [
       "201",
@@ -4993,12 +6413,110 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-19": [
+        "201",
+        "202",
+        "203",
+        "301",
+        "302",
+        "303"
+      ],
+      "2026-06-26": [
+        "304",
+        "305",
+        "306",
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-03": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506",
+        "601",
+        "602",
+        "603"
+      ],
+      "2026-07-10": [
+        "604",
+        "605",
+        "606",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "901",
+        "902",
+        "903"
+      ],
+      "2026-07-24": [
+        "904",
+        "905",
+        "906",
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-07-31": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105",
+        "1201",
+        "1202"
+      ],
+      "2026-08-07": [
+        "1203",
+        "1204",
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-14": [
+        "1401",
+        "1402",
+        "1403",
+        "1404",
+        "1501",
+        "1502"
+      ],
+      "2026-08-21": [
+        "1503",
+        "1504",
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PUERTAS DE ACCESO PROVISORIA",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 6,
+    "fecha": "2026-06-26",
     "done": [
       "201",
       "202",
@@ -5076,12 +6594,101 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "301",
+        "303",
+        "304",
+        "306"
+      ],
+      "2026-07-03": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406",
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-10": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005",
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-31": [
+        "1201",
+        "1202",
+        "1203",
+        "1204",
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-07": [
+        "1401",
+        "1402",
+        "1403",
+        "1404",
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-14": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PUERTAS DE BAÑO Y DORMITORIO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-03",
     "done": [
       "201",
       "202",
@@ -5159,12 +6766,88 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-10": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606",
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-17": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806",
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-07-24": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005",
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-07-31": [
+        "1201",
+        "1202",
+        "1203",
+        "1204",
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-08-07": [
+        "1401",
+        "1402",
+        "1403",
+        "1404",
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-08-14": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PINTURA CIELO BAÑO",
     "responsable": "C. Buffalo",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-06-26",
     "done": [],
     "pending": [
       "201",
@@ -5241,12 +6924,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-26": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-03": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-10": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-17": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-24": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-31": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-07": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-14": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-08-21": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-08-28": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-04": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-11": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-09-18": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-09-25": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-02": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "REVESTIMIENTO ENDOLADO VENTANA",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -5324,12 +7115,107 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-17": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-24": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-31": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-07": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-14": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-08-21": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-08-28": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-04": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-11": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-09-18": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-09-25": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-02": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ENTREGA CANCHA PAPEL",
     "responsable": "C. Buffalo",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [
       "201",
       "202",
@@ -5407,12 +7293,115 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-17": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-24": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-31": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-07": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-14": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-21": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-08-28": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-04": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-11": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-18": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-09-25": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-02": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-09": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PUERTA CLOSET",
     "responsable": "Muebles Norton Sur",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-06-12",
     "done": [],
     "pending": [
       "201",
@@ -5489,12 +7478,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-06-12": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-06-19": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-06-26": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-03": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-10": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-07-17": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-07-24": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-07-31": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-08-07": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-08-14": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-08-21": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-08-28": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-09-04": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-09-11": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-09-18": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PILASTRAS PUERTAS DE BAÑO Y DORMITORIO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-03",
     "done": [],
     "pending": [
       "201",
@@ -5571,12 +7668,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-03": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-10": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-17": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-24": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-07-31": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-07": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-14": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-21": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-08-28": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-04": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-11": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-18": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-09-25": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-02": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-09": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PINTURA DE PUERTAS DE BAÑO Y DORMITORIO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -5653,12 +7858,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "MANO DE TERMINACION PINTURA CLOSET",
     "responsable": "C. Buffalo",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -5735,12 +8048,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PINTURA DE COCINA",
     "responsable": "C. Buffalo",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -5817,12 +8238,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PISO FOTOLAMINADO DORMITORIO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -5899,12 +8428,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "GUARDAPOLVO LIVING Y DORMITORIO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -5981,12 +8618,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CUARTO RODON COCINA",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -6063,12 +8808,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "GUARDAPOLVO BAÑO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-10",
     "done": [],
     "pending": [
       "201",
@@ -6145,12 +8998,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-10": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-17": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-24": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-07-31": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-07": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-14": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-21": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-08-28": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-04": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-11": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-18": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-09-25": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-02": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-09": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-16": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "EXTRACTOR DE BAÑO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6227,12 +9188,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "WC",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6309,12 +9378,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "VANITORIO",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6391,12 +9568,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "GRIFERÍA RECEPTÁCULO Y TINA",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6473,12 +9758,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "GRIFERÍA VANITORIO",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6555,12 +9948,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "GRIFERÍA LAVAPLATOS",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6637,12 +10138,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "MONOKIT + GRIFERÍA LAVADORA",
     "responsable": "Agua Dulce",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6719,12 +10328,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "HORNO",
     "responsable": "Tatter & Baeza",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6801,12 +10518,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ENCIMERA",
     "responsable": "Tatter & Baeza",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6883,12 +10708,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CAMPANA",
     "responsable": "Tatter & Baeza",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -6965,12 +10898,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ARTEFACTADO ELÉCTRICO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-17",
     "done": [],
     "pending": [
       "201",
@@ -7047,12 +11088,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-17": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-24": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-07-31": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-07": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-14": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-21": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-08-28": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-04": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-11": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-18": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-09-25": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-02": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-09": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-16": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-23": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "TOPES DE PUERTA",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-24",
     "done": [],
     "pending": [
       "201",
@@ -7129,12 +11278,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-31": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-07": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-14": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-21": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-28": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-04": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-11": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-18": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-25": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-02": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-09": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-16": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-23": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-30": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "JABONERA",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-24",
     "done": [],
     "pending": [
       "201",
@@ -7211,12 +11468,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-31": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-07": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-14": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-21": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-28": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-04": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-11": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-18": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-25": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-02": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-09": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-16": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-23": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-30": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PORTARROLLO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-24",
     "done": [],
     "pending": [
       "201",
@@ -7293,12 +11658,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-31": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-07": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-14": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-21": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-28": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-04": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-11": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-18": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-25": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-02": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-09": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-16": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-23": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-30": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "TOALLERO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-24",
     "done": [],
     "pending": [
       "201",
@@ -7375,12 +11848,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-31": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-07": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-14": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-21": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-28": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-04": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-11": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-18": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-25": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-02": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-09": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-16": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-23": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-30": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PERCHA SIMPLE",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-24",
     "done": [],
     "pending": [
       "201",
@@ -7457,12 +12038,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-31": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-07": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-14": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-21": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-28": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-04": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-11": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-18": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-25": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-02": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-09": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-16": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-23": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-30": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "PAPEL MURAL",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-24",
     "done": [],
     "pending": [
       "201",
@@ -7539,12 +12228,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-24": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-07-31": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-07": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-14": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-21": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-08-28": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-04": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-11": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-18": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-09-25": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-02": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-09": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-16": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-23": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-10-30": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "MAMPARA",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-31",
     "done": [],
     "pending": [
       "201",
@@ -7621,12 +12418,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-31": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-08-07": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-14": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-21": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-28": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-09-04": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-11": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-18": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-25": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-10-02": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-09": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-16": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-23": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-30": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-11-06": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ESQUINERO NEGRO ENCUENTROS PVC",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-31",
     "done": [],
     "pending": [
       "201",
@@ -7703,12 +12608,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-31": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-08-07": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-14": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-21": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-28": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-09-04": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-11": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-18": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-25": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-10-02": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-09": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-16": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-23": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-30": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-11-06": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ESQUINERO ENDOLADO VENTANAS",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-31",
     "done": [],
     "pending": [
       "201",
@@ -7785,12 +12798,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-31": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-08-07": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-14": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-21": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-28": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-09-04": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-11": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-18": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-25": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-10-02": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-09": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-16": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-23": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-30": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-11-06": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "CUBREJUNTAS",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-07-31",
     "done": [],
     "pending": [
       "201",
@@ -7867,12 +12988,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-07-31": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-08-07": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-14": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-21": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-08-28": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-09-04": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-11": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-18": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-09-25": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-10-02": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-09": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-16": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-23": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-10-30": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-11-06": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ASEO FINAL",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-08-07",
     "done": [],
     "pending": [
       "201",
@@ -7949,12 +13178,120 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-08-07": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-08-14": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-21": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-28": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-09-04": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-09-11": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-18": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-25": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-10-02": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-10-09": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-16": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-23": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-30": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-11-06": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-11-13": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   },
   {
     "name": "ENTREGA SELLO BLANCO",
     "responsable": "Oscar Carrasco",
     "supervisorId": "oscar-carrasco",
+    "sem": 0,
+    "fecha": "2026-08-07",
     "done": [],
     "pending": [
       "201",
@@ -8031,62 +13368,115 @@ const ACTIVITIES = [
       "QUINCHO",
       "GIMNASIO",
       "SALA MULTIUSO"
-    ]
+    ],
+    "schedule": {
+      "2026-08-07": [
+        "201",
+        "202",
+        "203"
+      ],
+      "2026-08-14": [
+        "301",
+        "302",
+        "303",
+        "304",
+        "305",
+        "306"
+      ],
+      "2026-08-21": [
+        "401",
+        "402",
+        "403",
+        "404",
+        "405",
+        "406"
+      ],
+      "2026-08-28": [
+        "501",
+        "502",
+        "503",
+        "504",
+        "505",
+        "506"
+      ],
+      "2026-09-04": [
+        "601",
+        "602",
+        "603",
+        "604",
+        "605",
+        "606"
+      ],
+      "2026-09-11": [
+        "701",
+        "702",
+        "703",
+        "704",
+        "705",
+        "706"
+      ],
+      "2026-09-18": [
+        "801",
+        "802",
+        "803",
+        "804",
+        "805",
+        "806"
+      ],
+      "2026-09-25": [
+        "901",
+        "902",
+        "903",
+        "904",
+        "905",
+        "906"
+      ],
+      "2026-10-02": [
+        "1001",
+        "1002",
+        "1003",
+        "1004",
+        "1005"
+      ],
+      "2026-10-09": [
+        "1101",
+        "1102",
+        "1103",
+        "1104",
+        "1105"
+      ],
+      "2026-10-16": [
+        "1201",
+        "1202",
+        "1203",
+        "1204"
+      ],
+      "2026-10-23": [
+        "1301",
+        "1302",
+        "1303",
+        "1304"
+      ],
+      "2026-10-30": [
+        "1401",
+        "1402",
+        "1403",
+        "1404"
+      ],
+      "2026-11-06": [
+        "1501",
+        "1502",
+        "1503",
+        "1504"
+      ],
+      "2026-11-13": [
+        "QUINCHO",
+        "GIMNASIO",
+        "SALA MULTIUSO"
+      ]
+    }
   }
 ];
-
-const ADMIN = { id: 'admin', name: 'Administrador' };
-const ADMIN_PASSWORD = 'Limc2450725351';
-
-const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
-const WEEKDAY_LABELS = { mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie' };
-const WEEKDAY_FULL = { mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes' };
-
-function getMonday(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  d.setHours(0,0,0,0);
-  return d;
-}
-
-function getWeekDates(monday) {
-  const dates = [];
-  const days = [1, 2, 3, 4, 5];
-  for (const d of days) {
-    const date = new Date(monday);
-    const diff = d - date.getDay();
-    date.setDate(date.getDate() + diff);
-    dates.push(date);
-  }
-  return dates;
-}
-
-function formatDate(date) {
-  return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
-}
-
-function formatDateFull(date) {
-  return date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-function getTodayWeekdayIndex() {
-  const day = new Date().getDay();
-  const map = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 0, 0: 0 };
-  return map[day] ?? 0;
-}
-
-function getDeptLabel(code) {
-  const s = String(code);
-  if (s.length === 3) return `Piso ${s[0]} · Depto ${s.slice(1)}`;
-  if (s.length === 4) return `Piso ${s.slice(0,2)} · Depto ${s.slice(2)}`;
-  return code;
-}
-
-function getActivityName(idx) {
-  return ACTIVITIES[idx].name;
-}
 
 const SUPERVISOR_ACTIVITIES = {
   "francisco-ibanez": [
@@ -8132,15 +13522,8 @@ const SUPERVISOR_ACTIVITIES = {
     35,
     36,
     37,
-    38,
-    39,
-    40,
-    41,
-    42,
-    43,
     44,
-    45,
-    46
+    45
   ],
   "oscar-carrasco": [
     47,
@@ -8185,13 +13568,6 @@ const SUPERVISOR_ACTIVITIES = {
     86,
     87,
     88,
-    89,
-    90,
-    91,
-    92,
-    93,
-    94,
-    95,
-    96
+    89
   ]
 };
