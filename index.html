@@ -29,22 +29,35 @@
     </div>
 
     <div class="screen" id="screen-dashboard">
-      <div id="dashboard-content"></div>
+      <div class="content" id="dashboard-content"></div>
+    </div>
+
+    <div class="screen" id="screen-week">
+      <div class="content" id="week-content"></div>
     </div>
 
     <div class="screen" id="screen-activities">
-      <div id="activities-content"></div>
+      <div class="content" id="activities-content"></div>
     </div>
 
     <div class="screen" id="screen-export">
-      <div id="export-content"></div>
+      <div class="content" id="export-content"></div>
+    </div>
+
+    <div class="screen" id="screen-admin">
+      <div class="content" id="admin-content"></div>
     </div>
   </main>
 
   <nav id="nav-supervisor">
-    <button class="nav-btn" data-view="dashboard"><span class="nav-icon">📊</span>Resumen</button>
-    <button class="nav-btn" data-view="activities"><span class="nav-icon">📋</span>Actividades</button>
-    <button class="nav-btn" data-view="export"><span class="nav-icon">⚙️</span>Datos</button>
+    <button class="nav-btn" data-view="dashboard" id="nav-dashboard"><span class="nav-icon">📊</span>Hoy</button>
+    <button class="nav-btn" data-view="week" id="nav-week"><span class="nav-icon">📅</span>Semana</button>
+    <button class="nav-btn" data-view="activities" id="nav-activities"><span class="nav-icon">📋</span>Actividades</button>
+    <button class="nav-btn" data-view="export" id="nav-export"><span class="nav-icon">⚙️</span>Datos</button>
+  </nav>
+
+  <nav id="nav-admin" style="display:none">
+    <button class="nav-btn" data-view="admin-report" id="nav-admin-report"><span class="nav-icon">📊</span>Reportes</button>
   </nav>
 </div>
 

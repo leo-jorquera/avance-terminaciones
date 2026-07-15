@@ -8035,6 +8035,59 @@ const ACTIVITIES = [
   }
 ];
 
+const ADMIN = { id: 'admin', name: 'Administrador' };
+const ADMIN_PASSWORD = 'Limc2450725351';
+
+const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
+const WEEKDAY_LABELS = { mon: 'Lun', tue: 'Mar', wed: 'Mié', thu: 'Jue', fri: 'Vie' };
+const WEEKDAY_FULL = { mon: 'Lunes', tue: 'Martes', wed: 'Miércoles', thu: 'Jueves', fri: 'Viernes' };
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function getWeekDates(monday) {
+  const dates = [];
+  const days = [1, 2, 3, 4, 5];
+  for (const d of days) {
+    const date = new Date(monday);
+    const diff = d - date.getDay();
+    date.setDate(date.getDate() + diff);
+    dates.push(date);
+  }
+  return dates;
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+}
+
+function formatDateFull(date) {
+  return date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function getTodayWeekdayIndex() {
+  const day = new Date().getDay();
+  const map = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 0, 0: 0 };
+  return map[day] ?? 0;
+}
+
+function getDeptLabel(code) {
+  const s = String(code);
+  if (s.length === 3) return `Piso ${s[0]} · Depto ${s.slice(1)}`;
+  if (s.length === 4) return `Piso ${s.slice(0,2)} · Depto ${s.slice(2)}`;
+  return code;
+}
+
+function getActivityName(idx) {
+  return ACTIVITIES[idx].name;
+}
+
 const SUPERVISOR_ACTIVITIES = {
   "francisco-ibanez": [
     0,
