@@ -793,6 +793,21 @@ function exportAdminExcel() {
     const ws1 = XLSX.utils.aoa_to_sheet(wsDataWeek);
     XLSX.utils.book_append_sheet(wb, ws1, 'Semana');
 
+    // Resumen semanal: promedio por supervisor
+    const wsSummary = [['Supervisor', 'Actividades en Semana', 'Promedio Cumplimiento']];
+    let sumPct = 0, sumActs = 0;
+    for (const sup of SUPERVISORS) {
+      const w = getWeekProgressForSup(sup.id, dates);
+      wsSummary.push([sup.name, w.activityCount, w.activityCount > 0 ? w.weekPct + '%' : '—']);
+      sumPct += w.weekPct * w.activityCount;
+      sumActs += w.activityCount;
+    }
+    wsSummary.push([]);
+    wsSummary.push(['TOTAL', sumActs, sumActs > 0 ? Math.round(sumPct / sumActs) + '%' : '—']);
+    const wsS = XLSX.utils.aoa_to_sheet(wsSummary);
+    wsS['!cols'] = [{wch:25},{wch:22},{wch:22}];
+    XLSX.utils.book_append_sheet(wb, wsS, 'Resumen Semanal');
+
     // Progresso general sheet
     const wsData = [['Supervisor', 'Empresa', 'Actividad', 'Hecho', 'Pendiente', 'Total', '% Avance']];
     for (const sup of SUPERVISORS) {
