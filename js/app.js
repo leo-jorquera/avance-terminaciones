@@ -130,9 +130,10 @@ function getWeekProgressAll(supId) {
     }
 
     if (totalAct === 0) continue;
+    const pct = Math.round(doneAct / totalAct * 100);
     result.push({
       idx, name: act.name, responsable: act.responsable,
-      dayEntries, totalAct, doneAct,
+      dayEntries, totalAct, doneAct, pct,
       allDone: totalAct > 0 && doneAct === totalAct
     });
   }
@@ -401,10 +402,13 @@ function renderWeek() {
   }
   weekHeaderHtml += '</div>';
 
-  // Weekly totals
-  let weekTotalAll = 0, weekDoneAll = 0;
-  for (const t of dayTotals) { weekTotalAll += t.total; weekDoneAll += t.done; }
-  const weekPct = weekTotalAll ? Math.round(weekDoneAll/weekTotalAll*100) : 0;
+  // Weekly average of activity percentages
+  let weekPct = 0;
+  if (weekData.length > 0) {
+    let sum = 0;
+    for (const e of weekData) sum += e.pct;
+    weekPct = Math.round(sum / weekData.length);
+  }
 
   let html = `
     <div class="week-selector">
@@ -413,7 +417,7 @@ function renderWeek() {
       <button onclick="shiftWeek(1)">▶</button>
     </div>
     <div class="card" style="margin:12px 0;text-align:center">
-      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${weekPct}% · ${weekDoneAll}/${weekTotalAll} actividades</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${weekPct}% · ${weekData.length} actividades</div>
       <div class="progress-bar" style="height:4px">
         <div class="progress-fill" style="width:${weekPct}%;background:${weekPct === 100 ? 'var(--success)' : weekPct >= 50 ? 'var(--warning)' : 'var(--danger)'}"></div>
       </div>
@@ -595,7 +599,7 @@ function toggleActivity(header) {
 
 function getWeekProgressForSup(supId, dates) {
   const indices = SUPERVISOR_ACTIVITIES[supId] || [];
-  let weekTotal = 0, weekDone = 0;
+  const activityPcts = [];
   const noEjecutadas = [];
   for (const idx of indices) {
     const act = ACTIVITIES[idx];
@@ -623,9 +627,9 @@ function getWeekProgressForSup(supId, dates) {
       }
     }
 
-    weekTotal += actWeekTotal;
-    weekDone += actWeekDone;
-    if (hasWeekWork && actWeekDone < actWeekTotal) {
+    if (!hasWeekWork) continue;
+    activityPcts.push(Math.round(actWeekDone / actWeekTotal * 100));
+    if (actWeekDone < actWeekTotal) {
       const pend = [];
       for (let i = 0; i < 5; i++) {
         const depts = getDeptsForDate(idx, dates[i]);
@@ -634,7 +638,6 @@ function getWeekProgressForSup(supId, dates) {
           pend.push({ day: dates[i], count: pending.length });
         }
       }
-      // Add reprogrammed pending count
       const pendingBeforePending = pendingBefore.filter(d => !isDeptDoneGlobal(supId, idx, d));
       if (pendingBeforePending.length > 0) {
         pend.push({ day: dates[0], count: pendingBeforePending.length, repro: true });
@@ -642,7 +645,13 @@ function getWeekProgressForSup(supId, dates) {
       noEjecutadas.push({ name: act.name, responsable: act.responsable, pendientes: pend, done: actWeekDone, total: actWeekTotal });
     }
   }
-  return { weekTotal, weekDone, noEjecutadas };
+  let weekPct = 0;
+  if (activityPcts.length > 0) {
+    let sum = 0;
+    for (const p of activityPcts) sum += p;
+    weekPct = Math.round(sum / activityPcts.length);
+  }
+  return { activityCount: activityPcts.length, weekPct, noEjecutadas };
 }
 
 function renderAdminReport() {
@@ -662,36 +671,37 @@ function renderAdminReport() {
       <p style="color:var(--text2);font-size:13px">Cumplimiento por supervisor y actividades no ejecutadas.</p>
     </div>`;
 
-  // Overall totals across supervisors
-  let totalAll = 0, doneAll = 0;
+  // Overall average across supervisors
   const weekReports = [];
+  let totalAvg = 0;
   for (const sup of SUPERVISORS) {
     const w = getWeekProgressForSup(sup.id, dates);
-    totalAll += w.weekTotal;
-    doneAll += w.weekDone;
     weekReports.push({ sup, ...w });
+    if (w.activityCount > 0) totalAvg += w.weekPct * w.activityCount;
+  }
+  let globalPct = 0;
+  {
+    let totalActs = 0;
+    for (const r of weekReports) totalActs += r.activityCount;
+    if (totalActs > 0) {
+      let sum = 0;
+      for (const r of weekReports) sum += r.weekPct * r.activityCount;
+      globalPct = Math.round(sum / totalActs);
+    }
   }
 
   html += `<div class="stats-row">
       <div class="stat">
-        <div class="stat-num">${doneAll}</div>
-        <div class="stat-label">Ejecutado</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">${totalAll}</div>
-        <div class="stat-label">Programado</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">${totalAll ? Math.round(doneAll/totalAll*100) : 0}%</div>
+        <div class="stat-num">${globalPct}%</div>
         <div class="stat-label">Cumpl. Semanal</div>
       </div>
     </div>`;
 
   for (const r of weekReports) {
-    const pct = r.weekTotal ? Math.round(r.weekDone/r.weekTotal*100) : 0;
-    const allOk = r.weekTotal > 0 && pct === 100;
-    const someOk = r.weekTotal > 0 && pct > 0;
-    if (r.weekTotal === 0) {
+    const pct = r.weekPct;
+    const allOk = r.activityCount > 0 && pct === 100;
+    const someOk = r.activityCount > 0 && pct > 0;
+    if (r.activityCount === 0) {
       html += `<div class="card" style="margin-top:12px;opacity:.5">
         <div style="font-weight:700;font-size:15px">${r.sup.name}</div>
         <div style="font-size:12px;color:var(--text2)">Sin actividades programadas esta semana</div>
@@ -701,7 +711,7 @@ function renderAdminReport() {
     html += `<div class="card" style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div style="font-weight:700;font-size:15px">${r.sup.name}</div>
-        <div style="font-size:13px;font-weight:600;color:${allOk ? 'var(--success)' : someOk ? 'var(--warning)' : 'var(--danger)'}">${pct}% · ${r.weekDone}/${r.weekTotal}</div>
+        <div style="font-size:13px;font-weight:600;color:${allOk ? 'var(--success)' : someOk ? 'var(--warning)' : 'var(--danger)'}">${pct}% · ${r.activityCount} actividades</div>
       </div>
       <div class="progress-bar" style="height:4px">
         <div class="progress-fill" style="width:${pct}%;background:${allOk ? 'var(--success)' : someOk ? 'var(--warning)' : 'var(--danger)'}"></div>
