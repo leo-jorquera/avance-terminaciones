@@ -401,11 +401,22 @@ function renderWeek() {
   }
   weekHeaderHtml += '</div>';
 
+  // Weekly totals
+  let weekTotalAll = 0, weekDoneAll = 0;
+  for (const t of dayTotals) { weekTotalAll += t.total; weekDoneAll += t.done; }
+  const weekPct = weekTotalAll ? Math.round(weekDoneAll/weekTotalAll*100) : 0;
+
   let html = `
     <div class="week-selector">
       <button onclick="shiftWeek(-1)">◀</button>
       <span>Semana del ${formatDate(dates[0])}</span>
       <button onclick="shiftWeek(1)">▶</button>
+    </div>
+    <div class="card" style="margin:12px 0;text-align:center">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${weekPct}% · ${weekDoneAll}/${weekTotalAll} actividades</div>
+      <div class="progress-bar" style="height:4px">
+        <div class="progress-fill" style="width:${weekPct}%;background:${weekPct === 100 ? 'var(--success)' : weekPct >= 50 ? 'var(--warning)' : 'var(--danger)'}"></div>
+      </div>
     </div>
     ${weekHeaderHtml}
     ${daySummaryHtml}
