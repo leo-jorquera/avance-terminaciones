@@ -529,80 +529,118 @@ function toggleActivity(header) {
 
 // ===================== ADMIN =====================
 
+function getWeekProgressForSup(supId, dates) {
+  const indices = SUPERVISOR_ACTIVITIES[supId] || [];
+  let weekTotal = 0, weekDone = 0;
+  const noEjecutadas = [];
+  for (const idx of indices) {
+    const act = ACTIVITIES[idx];
+    let hasWeekWork = false;
+    let actWeekTotal = 0, actWeekDone = 0;
+    for (let i = 0; i < 5; i++) {
+      const depts = getDeptsForDate(idx, dates[i]);
+      if (depts.length === 0) continue;
+      hasWeekWork = true;
+      for (const d of depts) {
+        actWeekTotal++;
+        if (isDeptDoneGlobal(supId, idx, d)) actWeekDone++;
+      }
+    }
+    weekTotal += actWeekTotal;
+    weekDone += actWeekDone;
+    if (hasWeekWork && actWeekDone < actWeekTotal) {
+      const pend = [];
+      for (let i = 0; i < 5; i++) {
+        const depts = getDeptsForDate(idx, dates[i]);
+        const pending = depts.filter(d => !isDeptDoneGlobal(supId, idx, d));
+        if (pending.length > 0) {
+          pend.push({ day: dates[i], count: pending.length });
+        }
+      }
+      noEjecutadas.push({ name: act.name, responsable: act.responsable, pendientes: pend, done: actWeekDone, total: actWeekTotal });
+    }
+  }
+  return { weekTotal, weekDone, noEjecutadas };
+}
+
 function renderAdminReport() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-admin').classList.add('active');
   state.currentView = 'admin-report';
   const container = document.getElementById('admin-content');
+  const dates = getWeekDates(state.selectedWeek);
 
-  let html = `<div style="margin-bottom:16px">
-      <h2>Panel de Administración</h2>
-      <p style="color:var(--text2);font-size:13px">Reporte de cumplimiento por supervisor.</p>
-      <div style="font-size:13px;color:var(--text2)">${formatDateFull(new Date())}</div>
+  let html = `<div class="week-selector">
+      <button onclick="adminShiftWeek(-1)">◀</button>
+      <span>Semana del ${formatDate(dates[0])}</span>
+      <button onclick="adminShiftWeek(1)">▶</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <h2>Reporte Semanal</h2>
+      <p style="color:var(--text2);font-size:13px">Cumplimiento por supervisor y actividades no ejecutadas.</p>
     </div>`;
 
+  // Overall totals across supervisors
   let totalAll = 0, doneAll = 0;
-  const reports = [];
+  const weekReports = [];
   for (const sup of SUPERVISORS) {
-    const p = getAllProgress(sup.id);
-    totalAll += p.total;
-    doneAll += p.done;
-    const pct = p.total ? Math.round(p.done/p.total*100) : 0;
-    reports.push({ sup, ...p, pct });
+    const w = getWeekProgressForSup(sup.id, dates);
+    totalAll += w.weekTotal;
+    doneAll += w.weekDone;
+    weekReports.push({ sup, ...w });
   }
 
   html += `<div class="stats-row">
       <div class="stat">
         <div class="stat-num">${doneAll}</div>
-        <div class="stat-label">Total Hecho</div>
+        <div class="stat-label">Ejecutado</div>
       </div>
       <div class="stat">
         <div class="stat-num">${totalAll}</div>
-        <div class="stat-label">Total Prog.</div>
+        <div class="stat-label">Programado</div>
       </div>
       <div class="stat">
         <div class="stat-num">${totalAll ? Math.round(doneAll/totalAll*100) : 0}%</div>
-        <div class="stat-label">Avance Gral.</div>
+        <div class="stat-label">Cumpl. Semanal</div>
       </div>
     </div>`;
 
-  for (const r of reports) {
-    const isGood = r.pct >= 80;
-    const isMid = r.pct >= 50;
+  for (const r of weekReports) {
+    const pct = r.weekTotal ? Math.round(r.weekDone/r.weekTotal*100) : 0;
+    const allOk = r.weekTotal > 0 && pct === 100;
+    const someOk = r.weekTotal > 0 && pct > 0;
+    if (r.weekTotal === 0) {
+      html += `<div class="card" style="margin-top:12px;opacity:.5">
+        <div style="font-weight:700;font-size:15px">${r.sup.name}</div>
+        <div style="font-size:12px;color:var(--text2)">Sin actividades programadas esta semana</div>
+      </div>`;
+      continue;
+    }
     html += `<div class="card" style="margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
         <div style="font-weight:700;font-size:15px">${r.sup.name}</div>
-        <div style="font-size:13px;font-weight:600;color:${isGood ? 'var(--success)' : isMid ? 'var(--warning)' : 'var(--danger)'}">${r.pct}% · ${r.done}/${r.total}</div>
+        <div style="font-size:13px;font-weight:600;color:${allOk ? 'var(--success)' : someOk ? 'var(--warning)' : 'var(--danger)'}">${pct}% · ${r.weekDone}/${r.weekTotal}</div>
       </div>
       <div class="progress-bar" style="height:4px">
-        <div class="progress-fill" style="width:${r.pct}%;background:${isGood ? 'var(--success)' : isMid ? 'var(--warning)' : 'var(--danger)'}"></div>
+        <div class="progress-fill" style="width:${pct}%;background:${allOk ? 'var(--success)' : someOk ? 'var(--warning)' : 'var(--danger)'}"></div>
       </div>`;
 
-    // Find pending activities for this supervisor
-    const indices = SUPERVISOR_ACTIVITIES[r.sup.id] || [];
-    const pendingList = [];
-    for (const idx of indices) {
-      const act = ACTIVITIES[idx];
-      const pending = act.pending.filter(d => !isDeptDoneGlobal(r.sup.id, idx, d));
-      if (pending.length > 0) {
-        pendingList.push({ name: act.name, responsable: act.responsable, count: act.pending.length - pending.length, total: act.pending.length, pending });
-      }
-    }
-    if (pendingList.length > 0) {
-      html += `<div style="margin-top:10px;font-size:13px;font-weight:600;color:var(--danger)">⏳ Actividades Pendientes:</div>`;
+    if (r.noEjecutadas.length > 0) {
+      html += `<div style="margin-top:10px;font-size:13px;font-weight:600;color:var(--danger)">⏳ No ejecutadas:</div>`;
       let lastComp = '';
-      for (const p of pendingList) {
+      for (const p of r.noEjecutadas) {
         if (p.responsable !== lastComp) {
           html += `<div style="font-size:12px;color:var(--text2);margin-top:4px">${p.responsable}</div>`;
           lastComp = p.responsable;
         }
+        const daysStr = p.pendientes.map(d => `${d.day.getDate()}/${d.day.getMonth()+1} (${d.count})`).join(' · ');
         html += `<div style="font-size:12px;padding:3px 0;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.03)">
           <span>${p.name}</span>
-          <span style="color:var(--danger);font-weight:600">${p.count}/${p.total}</span>
+          <span style="color:var(--danger);font-weight:600;text-align:right;font-size:11px">${p.done}/${p.total} · ${daysStr}</span>
         </div>`;
       }
     } else {
-      html += `<div style="margin-top:8px;font-size:13px;color:var(--success)">✅ Todas las actividades completadas</div>`;
+      html += `<div style="margin-top:8px;font-size:13px;color:var(--success)">✅ Todo ejecutado esta semana</div>`;
     }
     html += `</div>`;
   }
@@ -616,9 +654,43 @@ function renderAdminReport() {
   container.innerHTML = html;
 }
 
+function adminShiftWeek(dir) {
+  const newDate = new Date(state.selectedWeek);
+  newDate.setDate(newDate.getDate() + dir * 7);
+  state.selectedWeek = newDate;
+  saveState();
+  renderAdminReport();
+}
+
 function exportAdminExcel() {
   loadXLSX(() => {
+    const dates = getWeekDates(state.selectedWeek);
     const wb = XLSX.utils.book_new();
+
+    // Semana actual sheet: weekly compliance per supervisor
+    const wsDataWeek = [['Supervisor', 'Actividad', 'Fecha', 'Departamentos Programados', 'Departamentos Ejecutados', '%', 'Estado']];
+    for (const sup of SUPERVISORS) {
+      const indices = SUPERVISOR_ACTIVITIES[sup.id] || [];
+      for (const idx of indices) {
+        const act = ACTIVITIES[idx];
+        for (let i = 0; i < 5; i++) {
+          const depts = getDeptsForDate(idx, dates[i]);
+          if (depts.length === 0) continue;
+          const doneCount = depts.filter(d => isDeptDoneGlobal(sup.id, idx, d)).length;
+          const pct = Math.round(doneCount/depts.length*100);
+          wsDataWeek.push([
+            sup.name, act.name, formatDate(dates[i]),
+            depts.length, doneCount, pct,
+            pct === 100 ? 'Completa' : pct > 0 ? 'Parcial' : 'No ejecutada'
+          ]);
+        }
+      }
+    }
+    if (wsDataWeek.length === 1) wsDataWeek.push(['Sin actividades programadas esta semana']);
+    const ws1 = XLSX.utils.aoa_to_sheet(wsDataWeek);
+    XLSX.utils.book_append_sheet(wb, ws1, 'Semana');
+
+    // Progresso general sheet
     const wsData = [['Supervisor', 'Empresa', 'Actividad', 'Hecho', 'Pendiente', 'Total', '% Avance']];
     for (const sup of SUPERVISORS) {
       const indices = SUPERVISOR_ACTIVITIES[sup.id] || [];
