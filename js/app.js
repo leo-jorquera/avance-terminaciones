@@ -5,6 +5,7 @@ let state = {
   selectedWeek: getMonday(new Date()),
   progress: {}
 };
+let _lastProgressJson = '';
 
 function esc(v) {
   return String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -153,6 +154,7 @@ function loadState() {
       if (parsed.selectedWeek) state.selectedWeek = new Date(parsed.selectedWeek);
     }
   } catch (e) {}
+  _lastProgressJson = JSON.stringify(state.progress);
 }
 
 function saveState() {
@@ -163,8 +165,25 @@ function saveState() {
       progress: state.progress,
       selectedWeek: state.selectedWeek.toISOString()
     }));
+    _lastProgressJson = JSON.stringify(state.progress);
   } catch (e) {}
 }
+
+function checkForUpdates() {
+  if (!state.currentUser) return;
+  try {
+    const saved = localStorage.getItem('avance2-state');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    const progJson = JSON.stringify(parsed.progress || {});
+    if (progJson !== _lastProgressJson) {
+      state.progress = parsed.progress || {};
+      _lastProgressJson = progJson;
+      render();
+    }
+  } catch (e) {}
+}
+setInterval(checkForUpdates, 5000);
 
 // ===================== RENDER =====================
 
@@ -528,6 +547,7 @@ function handleDayDeptClick(actIdx, dept) {
 function closeDayModal(e) {
   const modal = document.getElementById('day-modal');
   if (modal) modal.remove();
+  render();
 }
 
 // ===================== ACTIVITIES =====================
