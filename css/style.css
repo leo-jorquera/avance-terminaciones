@@ -63,6 +63,7 @@ main { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: tou
 .dept-btn:active { transform: scale(.95); }
 .dept-btn.done { background: rgba(46,204,113,.25); border-color: var(--success); color: var(--success); }
 .dept-btn.done::after { content: ' ✓'; font-size: 11px; }
+.dept-btn.repro { border-color: var(--accent); border-style: dashed; }
 
 /* WEEK VIEW */
 .week-header { display: grid; grid-template-columns: 2fr repeat(5, 1fr); gap: 4px; margin-bottom: 8px; font-size: 11px; color: var(--text2); text-align: center; }
@@ -73,6 +74,7 @@ main { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: tou
 .day-cell { height: 32px; border-radius: 6px; border: 1px solid var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; background: var(--surface2); transition: all .15s; }
 .day-cell:active { transform: scale(.92); }
 .day-cell.has-dept { border-color: var(--accent); background: rgba(15,52,96,.3); }
+.day-cell.has-repro { border-color: var(--accent); background: rgba(52,152,219,.1); }
 .day-cell.done { background: rgba(46,204,113,.25); border-color: var(--success); color: var(--success); }
 .day-cell.partial { background: rgba(241,196,15,.2); border-color: var(--warning); color: var(--warning); }
 .day-cell.day-incomplete { box-shadow: inset 0 0 0 2px var(--danger); }

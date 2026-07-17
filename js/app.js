@@ -77,6 +77,24 @@ function getDeptsForDate(actIdx, date) {
   return ACTIVITIES[actIdx].schedule[dStr] || [];
 }
 
+function getPendingFromBefore(supId, actIdx, weekStart) {
+  const act = ACTIVITIES[actIdx];
+  if (!act.schedule) return [];
+  const startMs = weekStart.getTime();
+  const result = [];
+  for (const [dateStr, depts] of Object.entries(act.schedule)) {
+    const d = new Date(dateStr + 'T12:00:00');
+    if (d.getTime() < startMs) {
+      for (const dept of depts) {
+        if (!isDeptDoneGlobal(supId, actIdx, dept)) {
+          result.push(dept);
+        }
+      }
+    }
+  }
+  return result;
+}
+
 function getWeekProgressAll(supId) {
   const dates = getWeekDates(state.selectedWeek);
   const indices = SUPERVISOR_ACTIVITIES[supId] || [];
@@ -94,6 +112,23 @@ function getWeekProgressAll(supId) {
       totalAct += depts.length;
       doneAct += doneDepts.length;
     }
+
+    // Reprogrammed from previous weeks -> show on Monday
+    const pendingBefore = getPendingFromBefore(supId, idx, dates[0]);
+    if (pendingBefore.length > 0) {
+      const doneBefore = pendingBefore.filter(d => isDeptDoneGlobal(supId, idx, d));
+      const monEntry = dayEntries.find(e => e.dayIdx === 0);
+      if (monEntry) {
+        monEntry.depts = [...pendingBefore, ...monEntry.depts];
+        monEntry.doneDepts = [...doneBefore, ...monEntry.doneDepts];
+        monEntry.reproCount = pendingBefore.length;
+      } else {
+        dayEntries.push({ dayIdx: 0, depts: pendingBefore, doneDepts: doneBefore, reproCount: pendingBefore.length });
+      }
+      totalAct += pendingBefore.length;
+      doneAct += doneBefore.length;
+    }
+
     if (totalAct === 0) continue;
     result.push({
       idx, name: act.name, responsable: act.responsable,
@@ -398,7 +433,9 @@ function renderWeek() {
         if (!dayAllDone && dayTotals[i].total > 0) cls += ' day-incomplete';
         if (isToday) cls += ' today';
         if (de.depts.length > 0) cls += ' has-dept';
+        if (de.reproCount) cls += ' has-repro';
         html += `<div class="${cls}" onclick="showDayDetail(${entry.idx},${i})">
+          ${de.reproCount ? '<span style="font-size:9px;color:var(--accent)">↻</span>' : ''}
           ${allDone ? '✓' : `${de.doneDepts.length}/${de.depts.length}`}
         </div>`;
       } else {
@@ -428,19 +465,35 @@ function showDayDetail(actIdx, dayIdx) {
   const dates = getWeekDates(state.selectedWeek);
   const date = dates[dayIdx];
   const act = ACTIVITIES[actIdx];
-  const depts = getDeptsForDate(actIdx, date);
-  if (depts.length === 0) return;
-  const dayLabel = date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
   const supId = state.currentUser;
+  const scheduleDepts = getDeptsForDate(actIdx, date);
+
+  // Build full dept list: scheduled + reprogrammed from prev weeks (on Mon)
+  const reproDepts = [];
+  const allDepts = [...scheduleDepts];
+  if (dayIdx === 0) {
+    const pendingBefore = getPendingFromBefore(supId, actIdx, dates[0]);
+    for (const d of pendingBefore) {
+      if (!allDepts.includes(d)) {
+        allDepts.push(d);
+        reproDepts.push(d);
+      }
+    }
+  }
+  if (allDepts.length === 0) return;
+  const dayLabel = date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 
   let html = `<div class="modal-overlay open" id="day-modal" onclick="closeDayModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <h3>${act.name}</h3>
       <p style="color:var(--text2);margin-bottom:12px">${dayLabel}</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px" id="day-dept-grid">`;
-  for (const d of depts) {
+  for (const d of allDepts) {
     const done = isDeptDoneGlobal(supId, actIdx, d);
-    html += `<div class="dept-btn ${done ? 'done' : ''}" data-dept="${d}" onclick="handleDayDeptClick(${actIdx},'${esc(d)}')" title="${getDeptLabel(d)}">${d}</div>`;
+    const isRepro = reproDepts.includes(d);
+    html += `<div class="dept-btn ${done ? 'done' : ''}${isRepro ? ' repro' : ''}" data-dept="${d}" onclick="handleDayDeptClick(${actIdx},'${esc(d)}')" title="${getDeptLabel(d)}${isRepro ? ' (reprogramada)' : ''}">
+      ${d}${isRepro ? '<span style="font-size:9px;color:var(--accent);display:block">↻ reprogramada</span>' : ''}
+    </div>`;
   }
   html += `</div>
       <div class="modal-actions">
@@ -537,6 +590,8 @@ function getWeekProgressForSup(supId, dates) {
     const act = ACTIVITIES[idx];
     let hasWeekWork = false;
     let actWeekTotal = 0, actWeekDone = 0;
+
+    // Count departments scheduled for this week's dates
     for (let i = 0; i < 5; i++) {
       const depts = getDeptsForDate(idx, dates[i]);
       if (depts.length === 0) continue;
@@ -546,6 +601,17 @@ function getWeekProgressForSup(supId, dates) {
         if (isDeptDoneGlobal(supId, idx, d)) actWeekDone++;
       }
     }
+
+    // Also count reprogrammed (pending from before this week)
+    const pendingBefore = getPendingFromBefore(supId, idx, dates[0]);
+    if (pendingBefore.length > 0) {
+      hasWeekWork = true;
+      for (const d of pendingBefore) {
+        actWeekTotal++;
+        if (isDeptDoneGlobal(supId, idx, d)) actWeekDone++;
+      }
+    }
+
     weekTotal += actWeekTotal;
     weekDone += actWeekDone;
     if (hasWeekWork && actWeekDone < actWeekTotal) {
@@ -556,6 +622,11 @@ function getWeekProgressForSup(supId, dates) {
         if (pending.length > 0) {
           pend.push({ day: dates[i], count: pending.length });
         }
+      }
+      // Add reprogrammed pending count
+      const pendingBeforePending = pendingBefore.filter(d => !isDeptDoneGlobal(supId, idx, d));
+      if (pendingBeforePending.length > 0) {
+        pend.push({ day: dates[0], count: pendingBeforePending.length, repro: true });
       }
       noEjecutadas.push({ name: act.name, responsable: act.responsable, pendientes: pend, done: actWeekDone, total: actWeekTotal });
     }
@@ -633,7 +704,7 @@ function renderAdminReport() {
           html += `<div style="font-size:12px;color:var(--text2);margin-top:4px">${p.responsable}</div>`;
           lastComp = p.responsable;
         }
-        const daysStr = p.pendientes.map(d => `${d.day.getDate()}/${d.day.getMonth()+1} (${d.count})`).join(' · ');
+        const daysStr = p.pendientes.map(d => `${d.repro ? '↻' : ''}${d.day.getDate()}/${d.day.getMonth()+1} (${d.count})`).join(' · ');
         html += `<div style="font-size:12px;padding:3px 0;display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.03)">
           <span>${p.name}</span>
           <span style="color:var(--danger);font-weight:600;text-align:right;font-size:11px">${p.done}/${p.total} · ${daysStr}</span>
@@ -668,7 +739,7 @@ function exportAdminExcel() {
     const wb = XLSX.utils.book_new();
 
     // Semana actual sheet: weekly compliance per supervisor
-    const wsDataWeek = [['Supervisor', 'Actividad', 'Fecha', 'Departamentos Programados', 'Departamentos Ejecutados', '%', 'Estado']];
+    const wsDataWeek = [['Supervisor', 'Actividad', 'Fecha', 'Tipo', 'Departamentos Programados', 'Departamentos Ejecutados', '%', 'Estado']];
     for (const sup of SUPERVISORS) {
       const indices = SUPERVISOR_ACTIVITIES[sup.id] || [];
       for (const idx of indices) {
@@ -679,8 +750,19 @@ function exportAdminExcel() {
           const doneCount = depts.filter(d => isDeptDoneGlobal(sup.id, idx, d)).length;
           const pct = Math.round(doneCount/depts.length*100);
           wsDataWeek.push([
-            sup.name, act.name, formatDate(dates[i]),
+            sup.name, act.name, formatDate(dates[i]), 'Programada',
             depts.length, doneCount, pct,
+            pct === 100 ? 'Completa' : pct > 0 ? 'Parcial' : 'No ejecutada'
+          ]);
+        }
+        // Reprogramadas
+        const pendingBefore = getPendingFromBefore(sup.id, idx, dates[0]);
+        if (pendingBefore.length > 0) {
+          const doneCount = pendingBefore.filter(d => isDeptDoneGlobal(sup.id, idx, d)).length;
+          const pct = Math.round(doneCount/pendingBefore.length*100);
+          wsDataWeek.push([
+            sup.name, act.name, formatDate(dates[0]), '↻ Reprogramada',
+            pendingBefore.length, doneCount, pct,
             pct === 100 ? 'Completa' : pct > 0 ? 'Parcial' : 'No ejecutada'
           ]);
         }
